@@ -51,14 +51,8 @@
           <a class="navbar-link">
             Publications
           </a>
-          <div class="navbar-dropdown">
-            <!-- 
-            <a class="navbar-item" href="[Paper Website]">
-              [Publication Title], [Year]
-            -->
-            <a class="navbar-item" href="https://benjamin-greenland.github.io/sograb.github.io/">
-              SoGraB: A Visual Method for Soft Grasping Benchmarking and Evaluation, 2025
-            </a>
+          <div class="navbar-dropdown" id="navbar-publications">
+            <!-- Loaded dynamically from publications.json -->
           </div>
         </div>
       </div>
@@ -212,41 +206,8 @@
         <h2 class="title is-3">Publications</h2>
           <div class="content has-text-left">
 
-            <ul class="publications-list" style="list-style:none; padding-left:0;">
-              <!--
-              <li style="display:flex; align-items:flex-start; gap:1rem; margin-bottom:1rem;">
-                <div style="flex:0 0 auto;">
-                  <img src="images/publication-thumb.gif" alt="Publication thumbnail" style="width:120px; height:auto; object-fit:cover; border-radius:0.25rem;">
-                </div>
-                <div style="flex:1;">
-                  <a href="[Paper Website]" target="_blank">
-                    <strong>[Publication Title]</strong>
-                  </a>
-                  <br>
-                  [Author Names.]
-                  <br>
-                  <em>[Conference/Journal Name, Year]</em>
-                  <br>
-                  <a href="[Paper Link]" target="_blank">[Paper]</a> | <a href="[Video Link]" target="_blank">[Video]</a>
-                </div>
-              </li>
-              -->
-              <li style="display:flex; align-items:flex-start; gap:1rem; margin-bottom:1rem;">
-                <div style="flex:0 0 auto;">
-                  <img src="./static/images/publications/sograb_2025.png" alt="SoGraB" style="width:120px; height:auto; object-fit:cover; border-radius:0.25rem;">
-                </div>
-                <div style="flex:1;">
-                  <a href="https://benjamin-greenland.github.io/sograb.github.io/" target="_blank">
-                    <strong>SoGraB: A Visual Method for Soft Grasping Benchmarking and Evaluation</strong>
-                  </a>
-                  <br>
-                  Benjamin Greenland, Josh Pinskier, Xing Wang, Daniel Nguyen, Ge Shi, Tirthankar Bandyopadhyay, Jen Jen Chung, and David Howard.
-                  <br>
-                  <em>IEEE-RAS International Conference on Soft Robotics (RoboSoft), 2025</em>
-                  <br>
-                  <a href="https://ieeexplore.ieee.org/document/11020918" target="_blank">[Paper]</a> | <a href="https://benjamin-greenland.github.io/sograb.github.io/static/images/poster.pdf" target="_blank">[Poster]</a> | <a href="https://www.youtube.com/playlist?list=PL-IPU_SnvwIOOTcBCAvSIc9evjSR6xeKD" target="_blank">[Video]</a> | <a href="https://github.com/benjamin-greenland/SoGraB" target="_blank">[Code]</a>
-                </div>
-              </li>
+            <ul class="publications-list" style="list-style:none; padding-left:0;" id="publications-list">
+              <!-- Loaded dynamically from publications.json -->
             </ul>
           </div>
         </div>
@@ -266,6 +227,66 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // Load and render publications from JSON
+    async function loadPublications() {
+      try {
+        const response = await fetch('./publications.json');
+        const publications = await response.json();
+        
+        // Populate navbar dropdown
+        const navbarDropdown = document.getElementById('navbar-publications');
+        publications.forEach(pub => {
+          const link = document.createElement('a');
+          link.className = 'navbar-item';
+          link.href = pub.links.website;
+          link.target = '_blank';
+          link.textContent = `${pub.title}, ${pub.year}`;
+          navbarDropdown.appendChild(link);
+        });
+        
+        // Render publications list
+        const publicationsList = document.getElementById('publications-list');
+        publications.forEach(pub => {
+          const li = document.createElement('li');
+          li.style.display = 'flex';
+          li.style.alignItems = 'flex-start';
+          li.style.gap = '1rem';
+          li.style.marginBottom = '1rem';
+          
+          let linksHTML = '';
+          if (pub.links.paper) linksHTML += `<a href="${pub.links.paper}" target="_blank">[Paper]</a>`;
+          if (pub.links.poster) linksHTML += ` | <a href="${pub.links.poster}" target="_blank">[Poster]</a>`;
+          if (pub.links.video) linksHTML += ` | <a href="${pub.links.video}" target="_blank">[Video]</a>`;
+          if (pub.links.code) linksHTML += ` | <a href="${pub.links.code}" target="_blank">[Code]</a>`;
+          
+          li.innerHTML = `
+            <div style="flex:0 0 auto;">
+              <img src="${pub.image}" alt="${pub.title}" style="width:120px; height:auto; object-fit:cover; border-radius:0.25rem;">
+            </div>
+            <div style="flex:1;">
+              <a href="${pub.links.website}" target="_blank">
+                <strong>${pub.title}</strong>
+              </a>
+              <br>
+              ${pub.authors}.
+              <br>
+              <em>${pub.venue}, ${pub.year}</em>
+              <br>
+              ${linksHTML}
+            </div>
+          `;
+          publicationsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error loading publications:', error);
+      }
+    }
+    
+    // Load publications when DOM is ready
+    document.addEventListener('DOMContentLoaded', loadPublications);
+  </script>
 
 </body>
 </html>
